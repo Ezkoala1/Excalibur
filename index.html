@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#05070c" />
+  <title>EXCALIBUR — Minecraft Client</title>
+
+  <style>
+    :root {
+      --bg: #05070c;
+      --bg-soft: #080c14;
+      --panel: rgba(12, 17, 27, 0.82);
+      --panel-solid: #0c111b;
+      --border: rgba(125, 150, 190, 0.13);
+      --border-hover: rgba(55, 136, 255, 0.48);
+
+      --text: #f5f8ff;
+      --muted: #8793a6;
+      --dim: #59667a;
+
+      --blue: #3688ff;
+      --blue-light: #65a7ff;
+      --blue-dark: #1762d4;
+
+      --green: #43df70;
+
+      --radius: 18px;
+      --max: 1180px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(54, 136, 255, 0.14), transparent 34%),
+        radial-gradient(circle at 85% 35%, rgba(23, 98, 212, 0.06), transparent 25%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: linear-gradient(to bottom, black, transparent 85%);
+      z-index: -1;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .container {
+      width: min(var(--max), calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    /* NAV */
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      background: rgba(5, 7, 12, 0.76);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav-inner {
+      width: min(1250px, calc(100% - 40px));
+      height: 76px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(101,167,255,0.45);
+      background:
+        linear-gradient(135deg, rgba(54,136,255,0.28), rgba(54,136,255,0.02));
+      display: grid;
+      place-items: center;
+      transform: rotate(45deg);
+      box-shadow: 0 0 30px rgba(54,136,255,0.1);
+    }
+
+    .brand-mark span {
+      width: 9px;
+      height: 9px;
+      background: var(--blue);
+      transform: rotate(-45deg);
+      box-shadow: 0 0 18px rgba(54,136,255,0.75);
+    }
+
+    .brand-text small {
+      display: block;
+      color: var(--dim);
+      font-size: 8px;
+      letter-spacing: 0.22em;
+      margin-top: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .nav-links a {
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: white;
+    }
+
+    .nav-cta {
+      padding: 11px 17px;
+      border-radius: 9px;
+      background: var(--blue);
+      color: white;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      transition: 0.2s ease;
+      box-shadow: 0 8px 30px rgba(54,136,255,0.16);
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      background: var(--blue-light);
+      box-shadow: 0 10px 35px rgba(54,136,255,0.27);
+    }
+
+    /* HERO */
+
+    .hero {
+      padding: 180px 0 110px;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 620px;
+      height: 620px;
+      left: 50%;
+      top: -260px;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(54,136,255,0.13), transparent 67%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 7px 12px;
+      border: 1px solid rgba(54,136,255,0.22);
+      background: rgba(54,136,255,0.055);
+      color: var(--blue-light);
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.13em;
+      margin-bottom: 25px;
+    }
+
+    .eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px rgba(67,223,112,0.8);
+    }
+
+    .hero h1 {
+      max-width: 900px;
+      margin: 0 auto;
+      font-size: clamp(55px, 9vw, 108px);
+      line-height: 0.87;
+      letter-spacing: -0.065em;
+      font-weight: 950;
+    }
+
+    .hero h1 span {
+      color: var(--blue);
+      text-shadow: 0 0 60px rgba(54,136,255,0.2);
+    }
+
+    .hero-description {
+      max-width: 670px;
+      margin: 30px auto 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .hero-actions {
+      margin-top: 34px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      min-height: 48px;
+      padding: 0 21px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: 0.04em;
+      transition: 0.22s ease;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: var(--blue);
+      box-shadow: 0 12px 35px rgba(54,136,255,0.18);
+    }
+
+    .btn-primary:hover {
+      background: var(--blue-light);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 42px rgba(54,136,255,0.28);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.025);
+      border-color: var(--border);
+      color: var(--muted);
+    }
+
+    .btn-secondary:hover {
+      color: white;
+      border-color: var(--border-hover);
+      background: rgba(54,136,255,0.05);
+      transform: translateY(-2px);
+    }
+
+    .hero-note {
+      margin-top: 19px;
+      color: var(--dim);
+      font-size: 11px;
+    }
+
+    /* STATS */
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 115px;
+    }
+
+    .stat {
+      padding: 25px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.018);
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 27px;
+      letter-spacing: -0.04em;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 5px;
+      color: var(--dim);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 750;
+    }
+
+    /* SECTIONS */
+
+    section {
+      padding: 90px 0;
+    }
+
+    .section-heading {
+      margin-bottom: 42px;
+    }
+
+    .section-kicker {
+      color: var(--blue-light);
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-bottom: 11px;
+    }
+
+    .section-heading h2 {
+      font-size: clamp(32px, 5vw, 52px);
+      line-height: 1;
+      letter-spacing: -0.045em;
+    }
+
+    .section-heading p {
+      max-width: 600px;
+      color: var(--muted);
+      margin-top: 15px;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    /* WHY */
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+    }
+
+    .why-main,
+    .comparison {
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: linear-gradient(145deg, rgba(15,22,34,0.9), rgba(8,12,19,0.85));
+      overflow: hidden;
+    }
+
+    .why-main {
+      padding: 40px;
+      position: relative;
+    }
+
+    .why-main::after {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      right: -100px;
+      bottom: -140px;
+      background: radial-gradient(circle, rgba(54,136,255,0.15), transparent 70%);
+    }
+
+    .why-main h3 {
+      font-size: 28px;
+      letter-spacing: -0.035em;
+      margin-bottom: 14px;
+    }
+
+    .why-main > p {
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 14px;
+      max-width: 620px;
+    }
+
+    .why-list {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px;
+    }
+
+    .why-item {
+      padding: 15px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.045);
+    }
+
+    .why-item strong {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .why-item span {
+      color: var(--dim);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .comparison {
+      padding: 28px;
+    }
+
+    .comparison-title {
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+
+    .price-row {
+      padding: 19px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .price-row:last-child {
+      border-bottom: 0;
+    }
+
+    .price-name {
+      font-weight: 750;
+      font-size: 14px;
+    }
+
+    .price-note {
+      color: var(--dim);
+      display: block;
+      font-size: 10px;
+      margin-top: 4px;
+    }
+
+    .price {
+      font-size: 21px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .price.excalibur {
+      color: var(--blue-light);
+    }
+
+    .saving {
+      margin-top: 21px;
+      padding: 14px;
+      border-radius: 11px;
+      background: rgba(67,223,112,0.055);
+      border: 1px solid rgba(67,223,112,0.13);
+      color: #8bf0a5;
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    /* FEATURES */
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 13px;
+    }
+
+    .feature {
+      padding: 25px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      transition: 0.25s ease;
+    }
+
+    .feature:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-hover);
+      background: rgba(13,21,34,0.95);
+    }
+
+    .feature-icon {
+      width: 35px;
+      height: 35px;
+      border-radius: 9px;
+      background: rgba(54,136,255,0.09);
+      border: 1px solid rgba(54,136,255,0.15);
+      display: grid;
+      place-items: center;
+      color: var(--blue-light);
+      font-size: 14px;
+      font-weight: 900;
+      margin-bottom: 20px;
+    }
+
+    .feature h3 {
+      font-size: 15px;
+      margin-bottom: 9px;
+    }
+
+    .feature p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    /* MODULES */
+
+    .module-category {
+      margin-top: 38px;
+    }
+
+    .module-category:first-of-type {
+      margin-top: 0;
+    }
+
+    .category-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .category-heading h3 {
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .category-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .module-count {
+      color: var(--dim);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 11px;
+    }
+
+    .module {
+      padding: 20px;
+      min-height: 145px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: rgba(10,15,24,0.78);
+      transition: 0.22s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .module::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: transparent;
+      transition: 0.22s ease;
+    }
+
+    .module:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-3px);
+    }
+
+    .module:hover::before {
+      background: var(--blue);
+      box-shadow: 0 0 18px rgba(54,136,255,0.5);
+    }
+
+    .module-number {
+      color: var(--dim);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+    }
+
+    .module h4 {
+      font-size: 15px;
+      margin: 10px 0 7px;
+    }
+
+    .module p {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    /* SHOWCASE */
+
+    .showcase {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .showcase-copy {
+      padding: 40px;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: var(--panel);
+    }
+
+    .showcase-copy h3 {
+      font-size: 29px;
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+    }
+
+    .showcase-copy p {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    .showcase-list {
+      margin-top: 27px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .showcase-list div {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #cbd5e5;
+      font-size: 12px;
+    }
+
+    .check {
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(67,223,112,0.08);
+      border: 1px solid rgba(67,223,112,0.15);
+      color: var(--green);
+      font-size: 9px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .client-window {
+      border: 1px solid rgba(125,150,190,0.17);
+      border-radius: 22px;
+      overflow: hidden;
+      background: #080d15;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+    }
+
+    .window-bar {
+      height: 45px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 15px;
+      gap: 7px;
+    }
+
+    .window-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #263345;
+    }
+
+    .window-title {
+      margin-left: 7px;
+      color: var(--dim);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+    }
+
+    .client-content {
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 145px 1fr;
+      gap: 15px;
+      min-height: 330px;
+    }
+
+    .client-sidebar {
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 9px;
+      background: rgba(255,255,255,0.018);
+    }
+
+    .side-title {
+      color: white;
+      font-size: 11px;
+      font-weight: 850;
+      padding: 8px;
+      margin-bottom: 5px;
+    }
+
+    .side-item {
+      padding: 8px;
+      color: var(--dim);
+      font-size: 10px;
+      border-radius: 7px;
+      margin-bottom: 2px;
+    }
+
+    .side-item.active {
+      background: rgba(54,136,255,0.12);
+      color: var(--blue-light);
+    }
+
+    .module-preview {
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 16px;
+      background: rgba(255,255,255,0.018);
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .preview-header strong {
+      font-size: 13px;
+    }
+
+    .online {
+      color: var(--green);
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .preview-module {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .preview-module span:first-child {
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .toggle {
+      width: 29px;
+      height: 16px;
+      border-radius: 99px;
+      background: var(--blue);
+      position: relative;
+      box-shadow: 0 0 14px rgba(54,136,255,0.22);
+    }
+
+    .toggle::after {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: white;
+      position: absolute;
+      right: 3px;
+      top: 3px;
+    }
+
+    /* PRICING */
+
+    .pricing-wrap {
+      max-width: 560px;
+      margin: auto;
+    }
+
+    .pricing-card {
+      padding: 38px;
+      border: 1px solid rgba(54,136,255,0.35);
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(54,136,255,0.13), transparent 45%),
+        rgba(10,16,26,0.9);
+      box-shadow: 0 30px 100px rgba(0,0,0,0.24);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pricing-badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(54,136,255,0.09);
+      border: 1px solid rgba(54,136,255,0.18);
+      color: var(--blue-light);
+      font-size: 9px;
+      font-weight: 850;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .pricing-card h3 {
+      margin-top: 20px;
+      font-size: 24px;
+    }
+
+    .price-big {
+      margin-top: 8px;
+      font-size: 58px;
+      font-weight: 950;
+      letter-spacing: -0.07em;
+    }
+
+    .price-big span {
+      font-size: 16px;
+      color: var(--dim);
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .pricing-sub {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .pricing-features {
+      margin: 28px auto;
+      max-width: 330px;
+      text-align: left;
+      display: grid;
+      gap: 11px;
+    }
+
+    .pricing-features div {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #d5deec;
+    }
+
+    .pricing-card .btn {
+      width: 100%;
+    }
+
+    /* FAQ */
+
+    .faq {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    details {
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: rgba(255,255,255,0.018);
+      margin-bottom: 9px;
+      overflow: hidden;
+    }
+
+    summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: "+";
+      color: var(--dim);
+      font-size: 20px;
+      font-weight: 400;
+    }
+
+    details[open] summary::after {
+      content: "−";
+      color: var(--blue-light);
+    }
+
+    details p {
+      padding: 0 20px 20px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+      max-width: 700px;
+    }
+
+    /* CTA */
+
+    .cta {
+      padding: 100px 0 120px;
+      text-align: center;
+    }
+
+    .cta-box {
+      padding: 70px 30px;
+      border: 1px solid var(--border);
+      border-radius: 25px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(54,136,255,0.12), transparent 55%),
+        rgba(9,14,22,0.86);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-box h2 {
+      font-size: clamp(38px, 6vw, 65px);
+      letter-spacing: -0.055em;
+    }
+
+    .cta-box p {
+      color: var(--muted);
+      margin: 15px auto 27px;
+      max-width: 550px;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* FOOTER */
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 0;
+      color: var(--dim);
+      font-size: 10px;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    /* REVEAL */
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 950px) {
+      .nav-links {
+        display: none;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .why-grid,
+      .showcase {
+        grid-template-columns: 1fr;
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .modules-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 650px) {
+      .container {
+        width: min(var(--max), calc(100% - 26px));
+      }
+
+      .nav-inner {
+        width: calc(100% - 26px);
+      }
+
+      .brand-text small {
+        display: none;
+      }
+
+      .nav-cta {
+        padding: 10px 12px;
+      }
+
+      .hero {
+        padding-top: 145px;
+      }
+
+      .hero h1 {
+        font-size: 58px;
+      }
+
+      .stats,
+      .features-grid,
+      .modules-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .why-list {
+        grid-template-columns: 1fr;
+      }
+
+      .why-main,
+      .showcase-copy,
+      .pricing-card {
+        padding: 26px;
+      }
+
+      .client-content {
+        grid-template-columns: 1fr;
+      }
+
+      .client-sidebar {
+        display: none;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#top" class="brand">
+        <div class="brand-mark">
+          <span></span>
+        </div>
+
+        <div class="brand-text">
+          EXCALIBUR
+          <small>MINECRAFT CLIENT</small>
+        </div>
+      </a>
+
+      <div class="nav-links">
+        <a href="#why">Why Excalibur</a>
+        <a href="#features">Features</a>
+        <a href="#modules">Modules</a>
+        <a href="#showcase">Showcase</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </div>
+
+      <a
+        class="nav-cta"
+        href="https://discord.gg/EtSFxBuD7D"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        PURCHASE
+      </a>
+    </div>
+  </nav>
+
+  <main id="top">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-glow"></div>
+
+      <div class="container">
+        <div class="eyebrow">
+          <span class="eyebrow-dot"></span>
+          20 MODULES • MINECRAFT 1.21.X
+        </div>
+
+        <h1>
+          BREAK THE<br>
+          <span>LIMITS.</span>
+        </h1>
+
+        <p class="hero-description">
+          EXCALIBUR is a feature-packed Minecraft hacked client built around
+          configurable combat, player, render and miscellaneous modules —
+          packaged into one fast and centralized experience.
+        </p>
+
+        <div class="hero-actions">
+          <a
+            href="https://discord.gg/EtSFxBuD7D"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-primary"
+          >
+            PURCHASE EXCALIBUR
+          </a>
+
+          <a href="#modules" class="btn btn-secondary">
+            VIEW MODULES
+          </a>
+        </div>
+
+        <div class="hero-note">
+          Minecraft Java Edition • 1.21.x • One-time purchase
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <div class="container">
+      <div class="stats reveal">
+        <div class="stat">
+          <strong>20</strong>
+          <span>Modules</span>
+        </div>
+
+        <div class="stat">
+          <strong>1.21.x</strong>
+          <span>Supported Version</span>
+        </div>
+
+        <div class="stat">
+          <strong>4</strong>
+          <span>Categories</span>
+        </div>
+
+        <div class="stat">
+          <strong>$4.99</strong>
+          <span>One-Time Purchase</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- WHY EXCALIBUR -->
+    <section id="why">
+      <div class="container">
+
+        <div class="section-heading reveal">
+          <div class="section-kicker">Why Excalibur</div>
+          <h2>Everything you need.<br>One client.</h2>
+          <p>
+            EXCALIBUR brings its modules into a single interface designed
+            around customization, accessibility and a straightforward
+            one-time purchase.
+          </p>
+        </div>
+
+        <div class="why-grid reveal">
+
+          <div class="why-main">
+            <h3>Built around the essentials.</h3>
+
+            <p>
+              From combat and movement-focused utilities to player,
+              render and miscellaneous features, EXCALIBUR keeps its
+              module collection organized into four simple categories.
+            </p>
+
+            <div class="why-list">
+
+              <div class="why-item">
+                <strong>20 Modules</strong>
+                <span>
+                  A focused collection covering Combat, Player, Render and Misc.
+                </span>
+              </div>
+
+              <div class="why-item">
+                <strong>1.21.x</strong>
+                <span>
+                  Designed specifically around modern Minecraft 1.21.x gameplay.
+                </span>
+              </div>
+
+              <div class="why-item">
+                <strong>One-Time Purchase</strong>
+                <span>
+                  Pay $4.99 once instead of maintaining a recurring subscription.
+                </span>
+              </div>
+
+              <div class="why-item">
+                <strong>Centralized Interface</strong>
+                <span>
+                  Manage the client's available modules from one organized UI.
+                </span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="comparison">
+            <div class="comparison-title">
+              Price comparison
+            </div>
+
+            <div class="price-row">
+              <div>
+                <div class="price-name">EXCALIBUR</div>
+                <span class="price-note">One-time purchase</span>
+              </div>
+
+              <div class="price excalibur">$4.99</div>
+            </div>
+
+            <div class="price-row">
+              <div>
+                <div class="price-name">Prestige</div>
+                <span class="price-note">$29.99 injection price</span>
+              </div>
+
+              <div class="price">$29.99</div>
+            </div>
+
+            <div class="price-row">
+              <div>
+                <div class="price-name">Vape</div>
+                <span class="price-note">$34.99 reference price</span>
+              </div>
+
+              <div class="price">$34.99</div>
+            </div>
+
+            <div class="saving">
+              At $4.99, EXCALIBUR is approximately
+              <strong>83.4% cheaper than $29.99</strong>
+              and
+              <strong>85.7% cheaper than $34.99</strong>.
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features">
+      <div class="container">
+
+        <div class="section-heading reveal">
+          <div class="section-kicker">The Client</div>
+          <h2>Simple. Configurable.<br>Focused.</h2>
+          <p>
+            EXCALIBUR is designed to keep the interface clean while giving
+            users direct access to its available modules.
+          </p>
+        </div>
+
+        <div class="features-grid">
+
+          <div class="feature reveal">
+            <div class="feature-icon">01</div>
+            <h3>20 Client Modules</h3>
+            <p>
+              Combat, Player, Render and Misc modules organized into
+              straightforward categories.
+            </p>
+          </div>
+
+          <div class="feature reveal">
+            <div class="feature-icon">02</div>
+            <h3>Modern Support</h3>
+            <p>
+              Built around Minecraft Java Edition 1.21.x.
+            </p>
+          </div>
+
+          <div class="feature reveal">
+            <div class="feature-icon">03</div>
+            <h3>Centralized GUI</h3>
+            <p>
+              Access and configure available modules through one
+              centralized client interface.
+            </p>
+          </div>
+
+          <div class="feature reveal">
+            <div class="feature-icon">04</div>
+            <h3>Combat Suite</h3>
+            <p>
+              A dedicated selection of combat-focused modules for
+              different gameplay configurations.
+            </p>
+          </div>
+
+          <div class="feature reveal">
+            <div class="feature-icon">05</div>
+            <h3>Render Tools</h3>
+            <p>
+              Visual modules designed to provide additional information
+              and visibility while playing.
+            </p>
+          </div>
+
+          <div class="feature reveal">
+            <div class="feature-icon">06</div>
+            <h3>One-Time Pricing</h3>
+            <p>
+              A single $4.99 purchase rather than a recurring monthly
+              subscription.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULES -->
+    <section id="modules">
+      <div class="container">
+
+        <div class="section-heading reveal">
+          <div class="section-kicker">20 Modules</div>
+          <h2>The Excalibur<br>Module Library.</h2>
+          <p>
+            Four categories covering the core features of the client.
+          </p>
+        </div>
+
+        <!-- COMBAT -->
+        <div class="module-category reveal">
+
+          <div class="category-heading">
+            <h3>Combat</h3>
+            <div class="category-line"></div>
+            <span class="module-count">06 MODULES</span>
+          </div>
+
+          <div class="modules-grid">
+
+            <div class="module">
+              <div class="module-number">01 / COMBAT</div>
+              <h4>KillAura</h4>
+              <p>
+                Automatically targets nearby entities and attacks them
+                according to configurable conditions.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">02 / COMBAT</div>
+              <h4>AimAssist</h4>
+              <p>
+                Helps keep the player's aim aligned toward nearby
+                targets during combat.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">03 / COMBAT</div>
+              <h4>Reach</h4>
+              <p>
+                Extends the effective distance at which attacks can
+                connect.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">04 / COMBAT</div>
+              <h4>Velocity</h4>
+              <p>
+                Modifies incoming knockback behavior after the player
+                is hit.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">05 / COMBAT</div>
+              <h4>Criticals</h4>
+              <p>
+                Makes attacks register as critical hits under
+                configurable conditions.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">06 / COMBAT</div>
+              <h4>AutoClicker</h4>
+              <p>
+                Automatically performs repeated attack clicks at a
+                configurable rate.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- PLAYER -->
+        <div class="module-category reveal">
+
+          <div class="category-heading">
+            <h3>Player</h3>
+            <div class="category-line"></div>
+            <span class="module-count">05 MODULES</span>
+          </div>
+
+          <div class="modules-grid">
+
+            <div class="module">
+              <div class="module-number">07 / PLAYER</div>
+              <h4>AutoArmor</h4>
+              <p>
+                Automatically equips better armor from the player's
+                inventory.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">08 / PLAYER</div>
+              <h4>InvMove</h4>
+              <p>
+                Allows movement while inventory or other GUI screens
+                are open.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">09 / PLAYER</div>
+              <h4>NoFall</h4>
+              <p>
+                Prevents or reduces the effects of fall damage.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">10 / PLAYER</div>
+              <h4>Timer</h4>
+              <p>
+                Changes client-side game tick timing for configurable
+                gameplay effects.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">11 / PLAYER</div>
+              <h4>Blink</h4>
+              <p>
+                Temporarily buffers player movement before sending it
+                in a burst.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- RENDER -->
+        <div class="module-category reveal">
+
+          <div class="category-heading">
+            <h3>Render</h3>
+            <div class="category-line"></div>
+            <span class="module-count">05 MODULES</span>
+          </div>
+
+          <div class="modules-grid">
+
+            <div class="module">
+              <div class="module-number">12 / RENDER</div>
+              <h4>ESP</h4>
+              <p>
+                Highlights players and entities through walls or at
+                extended distances.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">13 / RENDER</div>
+              <h4>Tracers</h4>
+              <p>
+                Draws visual lines toward selected players or entities.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">14 / RENDER</div>
+              <h4>Nametags</h4>
+              <p>
+                Displays enhanced information above players or entities.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">15 / RENDER</div>
+              <h4>FullBright</h4>
+              <p>
+                Keeps dark areas highly visible without relying on
+                normal lighting.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">16 / RENDER</div>
+              <h4>Freecam</h4>
+              <p>
+                Separates the camera from the player's normal viewpoint
+                for exploration and inspection.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- MISC -->
+        <div class="module-category reveal">
+
+          <div class="category-heading">
+            <h3>Misc</h3>
+            <div class="category-line"></div>
+            <span class="module-count">04 MODULES</span>
+          </div>
+
+          <div class="modules-grid">
+
+            <div class="module">
+              <div class="module-number">17 / MISC</div>
+              <h4>Scaffold</h4>
+              <p>
+                Automatically places blocks beneath or around the
+                player while building.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">18 / MISC</div>
+              <h4>ChestStealer</h4>
+              <p>
+                Quickly transfers selected items from containers into
+                the player's inventory.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">19 / MISC</div>
+              <h4>AntiBot</h4>
+              <p>
+                Attempts to distinguish real players from
+                server-created bot entities.
+              </p>
+            </div>
+
+            <div class="module">
+              <div class="module-number">20 / MISC</div>
+              <h4>FastPlace</h4>
+              <p>
+                Reduces delays associated with placing blocks or using
+                certain items.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SHOWCASE -->
+    <section id="showcase">
+      <div class="container">
+
+        <div class="section-heading reveal">
+          <div class="section-kicker">Interface</div>
+          <h2>One place.<br>Every module.</h2>
+        </div>
+
+        <div class="showcase">
+
+          <div class="showcase-copy reveal">
+            <h3>A client interface built around control.</h3>
+
+            <p>
+              Keep your modules organized and accessible through a
+              centralized interface designed to make switching between
+              categories straightforward.
+            </p>
+
+            <div class="showcase-list">
+
+              <div>
+                <span class="check">✓</span>
+                Combat module collection
+              </div>
+
+              <div>
+                <span class="check">✓</span>
+                Player utilities
+              </div>
+
+              <div>
+                <span class="check">✓</span>
+                Render modules
+              </div>
+
+              <div>
+                <span class="check">✓</span>
+                Miscellaneous utilities
+              </div>
+
+              <div>
+                <span class="check">✓</span>
+                Minecraft 1.21.x
+              </div>
+
+              <div>
+                <span class="check">✓</span>
+                $4.99 one-time purchase
+              </div>
+
+            </div>
+          </div>
+
+          <div class="client-window reveal">
+
+            <div class="window-bar">
+              <span class="window-dot"></span>
+              <span class="window-dot"></span>
+              <span class="window-dot"></span>
+              <span class="window-title">
+                EXCALIBUR / CLIENT
+              </span>
+            </div>
+
+            <div class="client-content">
+
+              <div class="client-sidebar">
+                <div class="side-title">EXCALIBUR</div>
+
+                <div class="side-item active">Combat</div>
+                <div class="side-item">Player</div>
+                <div class="side-item">Render</div>
+                <div class="side-item">Misc</div>
+              </div>
+
+              <div class="module-preview">
+
+                <div class="preview-header">
+                  <strong>Combat Modules</strong>
+                  <span class="online">READY</span>
+                </div>
+
+                <div class="preview-module">
+                  <span>KillAura</span>
+                  <div class="toggle"></div>
+                </div>
+
+                <div class="preview-module">
+                  <span>AimAssist</span>
+                  <div class="toggle"></div>
+                </div>
+
+                <div class="preview-module">
+                  <span>Reach</span>
+                  <div class="toggle"></div>
+                </div>
+
+                <div class="preview-module">
+                  <span>Velocity</span>
+                  <div class="toggle"></div>
+                </div>
+
+                <div class="preview-module">
+                  <span>Criticals</span>
+                  <div class="toggle"></div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing">
+      <div class="container">
+
+        <div class="section-heading reveal" style="text-align:center;">
+          <div class="section-kicker">Pricing</div>
+          <h2>One price.<br>No subscription.</h2>
+          <p style="margin-left:auto;margin-right:auto;">
+            Get EXCALIBUR for a single payment of $4.99.
+          </p>
+        </div>
+
+        <div class="pricing-wrap reveal">
+
+          <div class="pricing-card">
+
+            <div class="pricing-badge">
+              EXCALIBUR ACCESS
+            </div>
+
+            <h3>Full Client</h3>
+
+            <div class="price-big">
+              $4.99
+              <span>USD</span>
+            </div>
+
+            <div class="pricing-sub">
+              One-time purchase
+            </div>
+
+            <div class="pricing-features">
+
+              <div>
+                <span class="check">✓</span>
+                20 client modules
+              </div>
+
+              <div>
+                <span class="check">✓</span>
+                Combat, Player, Render & Misc
+              </div>
+
+              <div>
+                <span class="check">✓</span>
+                Minecraft Java 1.21.x
+              </div>
+
+              <div>
+                <span class="check">✓</span>
+                Centralized client interface
+              </div>
+
+              <div>
+                <span class="check">✓</span>
+                One-time payment
+              </div>
+
+            </div>
+
+            <a
+              href="https://discord.gg/EtSFxBuD7D"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn btn-primary"
+            >
+              PURCHASE EXCALIBUR
+            </a>
+
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+      <div class="container">
+
+        <div class="section-heading reveal" style="text-align:center;">
+          <div class="section-kicker">FAQ</div>
+          <h2>Questions?</h2>
+        </div>
+
+        <div class="faq reveal">
+
+          <details>
+            <summary>How much does Excalibur cost?</summary>
+            <p>
+              EXCALIBUR is listed at $4.99 USD as a one-time purchase.
+            </p>
+          </details>
+
+          <details>
+            <summary>Is it a subscription?</summary>
+            <p>
+              No. The listed price is a one-time $4.99 purchase.
+            </p>
+          </details>
+
+          <details>
+            <summary>What Minecraft versions does it support?</summary>
+            <p>
+              The current website listing is for Minecraft Java Edition
+              1.21.x.
+            </p>
+          </details>
+
+          <details>
+            <summary>How do I purchase Excalibur?</summary>
+            <p>
+              Use one of the Purchase Excalibur buttons on the website
+              to join the official Discord server and follow the
+              purchase information provided there.
+            </p>
+          </details>
+
+          <details>
+            <summary>How many modules are included?</summary>
+            <p>
+              The current module list contains 20 modules divided into
+              Combat, Player, Render and Misc categories.
+            </p>
+          </details>
+
+          <details>
+            <summary>Is Excalibur affiliated with Mojang or Microsoft?</summary>
+            <p>
+              No. EXCALIBUR is an independent third-party Minecraft
+              project and is not affiliated with Mojang Studios or Microsoft.
+            </p>
+          </details>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+      <div class="container">
+
+        <div class="cta-box reveal">
+
+          <div class="eyebrow">
+            <span class="eyebrow-dot"></span>
+            EXCALIBUR • 1.21.X
+          </div>
+
+          <h2>Ready to enter?</h2>
+
+          <p>
+            Join the Excalibur Discord and get access to the purchase
+            information for the $4.99 one-time client.
+          </p>
+
+          <a
+            href="https://discord.gg/EtSFxBuD7D"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-primary"
+          >
+            PURCHASE EXCALIBUR
+          </a>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+
+        <div>
+          © 2026 EXCALIBUR. Independent third-party project.
+        </div>
+
+        <div class="footer-links">
+          <a
+            href="https://discord.gg/EtSFxBuD7D"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Discord
+          </a>
+
+          <a href="#modules">
+            Modules
+          </a>
+
+          <a href="#faq">
+            FAQ
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const revealElements = document.querySelectorAll(".reveal");
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.08
+      }
+    );
+
+    revealElements.forEach((element) => {
+      observer.observe(element);
+    });
+
+    // Smooth navigation
+    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+      link.addEventListener("click", (event) => {
+        const target = document.querySelector(link.getAttribute("href"));
+
+        if (!target) return;
+
+        event.preventDefault();
+
+        target.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>
